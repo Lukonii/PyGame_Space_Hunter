@@ -23,4 +23,4 @@ Last step, run the project and enjoy!
 
 	python main.py
 
-*This project uses Serbian words.
+*This project uses Serbian words for variables*
