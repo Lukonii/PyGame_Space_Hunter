@@ -22,3 +22,5 @@ Now, you need to install pygame library
 Last step, run the project and enjoy!
 
 	python main.py
+
+*This project uses Serbian words.
