@@ -1,4 +1,5 @@
 import pygame as pg
+import time
 
 pg.init()
 
@@ -24,6 +25,7 @@ buba = pg.transform.scale(buba,(60,60))
 buba = pg.transform.rotate(buba,180)
 metak = pg.transform.scale(metak,(20,20))
 eksplozija = pg.transform.scale(eksplozija,(60,60))
+nivo = 1
 
 razmak_izmedju_buba = 65
 pomeraj_buba = 5
@@ -60,10 +62,10 @@ def crtaj_scenu():
         prozor.blit(eksplozija,(eksplozija_x,eksplozija_y))
     poredjaj_bube(bube_x, bube_y)
 
-def crtaj_kraj():
+def crtaj_kraj(poruka):
     prozor.fill(pg.Color("white"))
     font = pg.font.SysFont("Arial", 60)
-    poruka = "Kraj igre!"
+    #poruka = "Kraj igre!"
     tekst = font.render(poruka, True, pg.Color("black"))
     (sirina_teksta, visina_teksta) = (tekst.get_width(), tekst.get_height())
     (x, y) = ((sirina - sirina_teksta) / 2, (visina - visina_teksta) / 2)
@@ -97,10 +99,24 @@ def proveri_pogodak():
         v = v + razmak_izmedju_buba
             #print("Bube x: %d",v)
     #print("Metak x: %d",metak_x)
+sat = pg.time.Clock()
+prozor.blit(pozadina, [0, 0])
+prozor.blit(lovac, (lovac_x, lovac_y))
+poredjaj_bube(50, 50)
+
+def novi_nivo(broj_buba):
+    global pocetni_broj_buba
+    global niz_buba
+    pocetni_broj_buba = broj_buba
+    for i in range(pocetni_broj_buba):
+        niz_buba.append(1)
+    poredjaj_bube(50,100)
+
 def novi_frejm():
     global kraj_igre
     global metak_aktivan
     global eksplozija_aktivna
+    global nivo
     if(metak_y<0):
         metak_aktivan = False
     if (metak_aktivan == True):
@@ -108,14 +124,23 @@ def novi_frejm():
     if(brojac%5==0 and eksplozija_aktivna == True):
         eksplozija_aktivna = False
     if(bube_y+20 >= lovac_y):
+        #bube su pojele lovca
         kraj_igre = True
+        crtaj_kraj("Izgubili ste! Kraj igre!")
     c = 0
     for i in range(pocetni_broj_buba):
         if(niz_buba[i]==1):
             c = 1
             break
     if(c==0):
-        kraj_igre = True
+        #kraj_igre = True
+        if nivo == 2:
+            kraj_igre = True
+            crtaj_kraj("Pobeda! Kraj igre!")
+        else:
+            nivo = 2
+
+
 def obradi_dogadjaj(dogadjaj):
     global lovac_x
     global metak_aktivan, metak_x, metak_y
@@ -131,10 +156,6 @@ def obradi_dogadjaj(dogadjaj):
                 metak_aktivan = True
                 metak_x = lovac_x+20
                 metak_y = lovac_y
-sat = pg.time.Clock()
-prozor.blit(pozadina, [0, 0])
-prozor.blit(lovac, (lovac_x, lovac_y))
-poredjaj_bube(50, 50)
 
 def promeni_bube(x):
     global bube_y
@@ -143,7 +164,8 @@ def pomeri_metak():
     global metak_y
     metak_y = metak_y - 20
 brojac = 0
-while not kraj_igre:
+print("Nivo: ",nivo)
+while nivo == 1 and not kraj_igre:
     if(brojac%100 == 0):
         promeni_bube(pomeraj_buba) #pomeri poziciju gde ce biti bude u sledecem crtanju
     if(brojac%5==0 and metak_aktivan == True):
@@ -158,8 +180,41 @@ while not kraj_igre:
     sat.tick(200)
     brojac = brojac + 1
     novi_frejm()
+
+#nivo 2
+if not kraj_igre:
+    crtaj_kraj("Nivo 2")
+    time.sleep(2)
+    pozadina = pg.image.load("slike/pozadina2.jpg").convert()
+    pocetni_broj_buba = 7
+    razmak_izmedju_buba = 100
+    niz_buba.clear()
+    for i in range(pocetni_broj_buba):
+        niz_buba.append(1)
+    crtaj_scenu()
+    bube_y = 50
+    bube_x = 50
+    poredjaj_bube(50, 100)
+    print("Nivo: ",nivo)
+    brojac = 0
+while nivo == 2 and not kraj_igre:
+    if(brojac%50 == 0):
+        promeni_bube(pomeraj_buba) #pomeri poziciju gde ce biti bude u sledecem crtanju
+    if(brojac%5==0 and metak_aktivan == True):
+        pomeri_metak()
+    crtaj()
+    pg.display.update()
+    for dogadjaj in pg.event.get():
+        if dogadjaj.type == pg.QUIT:
+            pg.quit()
+        else:
+            obradi_dogadjaj(dogadjaj)
+    sat.tick(200)
+    brojac = brojac + 1
+    novi_frejm()
+
+print("Kraj")
 while kraj_igre:
-    crtaj_kraj()
     for dogadjaj in pg.event.get():
         if dogadjaj.type == pg.QUIT:
             pg.quit()
